@@ -30,10 +30,15 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
-        
+
     - name: Install Elastic Beanstalk CLI
       run: |
         pip install awsebcli --upgrade --user
+
+    - name: Initialize Elastic Beanstalk
+      run: |
+        eb init -r us-east-1 -p python-3.8 MyApplicationName
+        # Replace "MyApplicationName" with your actual application name
 
     - name: Deploy to AWS Elastic Beanstalk
       run: |
