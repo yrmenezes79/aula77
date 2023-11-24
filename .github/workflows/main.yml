@@ -39,8 +39,12 @@ jobs:
 
     - name: Create SSH Key
       run: |
+        mkdir -p ~/.ssh
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
         chmod 600 ~/.ssh/ec2-key.pem
+
+    - name: Verify SSH Key
+      run: cat ~/.ssh/ec2-key.pem
 
     - name: Deploy to EC2
       run: scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@ec2-instance-ip:/path/on/ec2/instance
