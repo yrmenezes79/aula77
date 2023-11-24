@@ -31,10 +31,16 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
 
-    - name: Download EC2 SSH Key
-      run: echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
-    - name: Set Permissions
-      run: chmod 600 ~/.ssh/ec2-key.pem
+    - name: Debug Information
+      run: |
+        echo "Current Directory: $(pwd)"
+        echo "Files in Current Directory: $(ls)"
+        echo "Contents of .ssh directory: $(ls ~/.ssh)"
+
+    - name: Create SSH Key
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
+        chmod 600 ~/.ssh/ec2-key.pem
 
     - name: Deploy to EC2
       run: scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@ec2-instance-ip:/path/on/ec2/instance
