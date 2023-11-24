@@ -34,3 +34,7 @@ jobs:
     - name: Deploy to AWS Elastic Beanstalk
       run: |
         eb create MyEnvironmentName --region us-east-1
+
+    - name: Run Python Application
+      run: |
+        python app.py
