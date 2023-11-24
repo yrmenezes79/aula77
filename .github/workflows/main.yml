@@ -1,4 +1,4 @@
-name: AWS Deployment
+name: AWS Deployment to S3
 
 on:
   push:
@@ -8,9 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    env:
-      EC2_INSTANCE_IP: "your-ec2-instance-ip"  # Substitua com o IP da sua instância EC2
 
     steps:
     - name: Checkout Repository
@@ -26,6 +23,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Debug Information
+      run: |
+        echo "Current Directory: $(pwd)"
+        echo "Files in Current Directory: $(ls)"
+        echo "Contents of .ssh directory: $(ls ~/.ssh)"
+
+    - name: Create and Package Python Application
+      run: |
+        mkdir -p packaged
+        zip -r packaged/app.zip *
+
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -34,32 +42,6 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
 
-    - name: Debug Information
-      run: |
-        echo "Current Directory: $(pwd)"
-        echo "Files in Current Directory: $(ls)"
-        echo "Contents of .ssh directory: $(ls ~/.ssh)"
-
-    - name: Create SSH Key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
-        chmod 600 ~/.ssh/ec2-key.pem
-
-    - name: Verify SSH Key
-      run: cat ~/.ssh/ec2-key.pem
-
-    - name: Deploy to EC2
-      run: |
-        scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@${EC2_INSTANCE_IP}:/path/on/ec2/instance
-        # Replace "/path/to/local/files" with the path to your local files
-        # Replace "user" with the username for your EC2 instance
-        # Replace "${EC2_INSTANCE_IP}" with the actual IP address of your EC2 instance
-        # Replace "/path/on/ec2/instance" with the path where you want to copy the files on the EC2 instance
-
-    - name: Run Python Application on EC2
-      run: |
-        ssh -i ~/.ssh/ec2-key.pem user@${EC2_INSTANCE_IP} "cd /path/on/ec2/instance && python app.py"
-        # Replace "user" with the username for your EC2 instance
-        # Replace "${EC2_INSTANCE_IP}" with the actual IP address of your EC2 instance
-        # Replace "/path/on/ec2/instance" with the path where you copied the files on the EC2 instance
+    - name: Upload Python Application to S3
+      run: aws s3 cp packaged/app.zip s3://refddasfcwercwqertvertvwertve/
+      # Replace "your-s3-bucket-name" with the name of your S3 bucket
