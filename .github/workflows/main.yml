@@ -9,6 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      EC2_INSTANCE_IP: "your-ec2-instance-ip"  # Substitua com o IP da sua instância EC2
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -47,14 +50,16 @@ jobs:
       run: cat ~/.ssh/ec2-key.pem
 
     - name: Deploy to EC2
-      run: scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@ec2-instance-ip:/path/on/ec2/instance
-      # Replace "/path/to/local/files" with the path to your local files
-      # Replace "user" with the username for your EC2 instance
-      # Replace "ec2-instance-ip" with the public IP address of your EC2 instance
-      # Replace "/path/on/ec2/instance" with the path where you want to copy the files on the EC2 instance
+      run: |
+        scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@${EC2_INSTANCE_IP}:/path/on/ec2/instance
+        # Replace "/path/to/local/files" with the path to your local files
+        # Replace "user" with the username for your EC2 instance
+        # Replace "${EC2_INSTANCE_IP}" with the actual IP address of your EC2 instance
+        # Replace "/path/on/ec2/instance" with the path where you want to copy the files on the EC2 instance
 
     - name: Run Python Application on EC2
-      run: ssh -i ~/.ssh/ec2-key.pem user@ec2-instance-ip "cd /path/on/ec2/instance && python app.py"
-      # Replace "user" with the username for your EC2 instance
-      # Replace "ec2-instance-ip" with the public IP address of your EC2 instance
-      # Replace "/path/on/ec2/instance" with the path where you copied the files on the EC2 instance
+      run: |
+        ssh -i ~/.ssh/ec2-key.pem user@${EC2_INSTANCE_IP} "cd /path/on/ec2/instance && python app.py"
+        # Replace "user" with the username for your EC2 instance
+        # Replace "${EC2_INSTANCE_IP}" with the actual IP address of your EC2 instance
+        # Replace "/path/on/ec2/instance" with the path where you copied the files on the EC2 instance
