@@ -31,19 +31,20 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: us-east-1
 
-    - name: Install Elastic Beanstalk CLI
-      run: |
-        pip install awsebcli --upgrade --user
+    - name: Download EC2 SSH Key
+      run: echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
+    - name: Set Permissions
+      run: chmod 600 ~/.ssh/ec2-key.pem
 
-    - name: Initialize Elastic Beanstalk
-      run: |
-        eb init -r us-east-1 -p python-3.8 MyApplicationName
-        # Replace "MyApplicationName" with your actual application name
+    - name: Deploy to EC2
+      run: scp -i ~/.ssh/ec2-key.pem -r /path/to/local/files user@ec2-instance-ip:/path/on/ec2/instance
+      # Replace "/path/to/local/files" with the path to your local files
+      # Replace "user" with the username for your EC2 instance
+      # Replace "ec2-instance-ip" with the public IP address of your EC2 instance
+      # Replace "/path/on/ec2/instance" with the path where you want to copy the files on the EC2 instance
 
-    - name: Deploy to AWS Elastic Beanstalk
-      run: |
-        eb create MyEnvironmentName --region us-east-1
-
-    - name: Run Python Application
-      run: |
-        python app.py
+    - name: Run Python Application on EC2
+      run: ssh -i ~/.ssh/ec2-key.pem user@ec2-instance-ip "cd /path/on/ec2/instance && python app.py"
+      # Replace "user" with the username for your EC2 instance
+      # Replace "ec2-instance-ip" with the public IP address of your EC2 instance
+      # Replace "/path/on/ec2/instance" with the path where you copied the files on the EC2 instance
